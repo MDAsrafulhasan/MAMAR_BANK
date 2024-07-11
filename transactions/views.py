@@ -71,11 +71,15 @@ class DepositMoneyView(TransactionCreateMixin):
                 'balance'
             ]
         )
-
+        formatted_amount = "{:,.2f}".format(float(amount))
         messages.success(
             self.request,
-            f'{"{:,.2f}".format(float(amount))}$ was deposited to your account successfully'
+            f'{formatted_amount}$ was deposited to your account successfully'
         )
+        # messages.success(
+        #     self.request,
+        #     f'{"{:,.2f}".format(float(amount))}$ was deposited to your account successfully'
+        # )
         send_transaction_email(self.request.user, amount, "Deposite Message", "transactions/deposite_email.html")
         return super().form_valid(form)
 
@@ -95,10 +99,10 @@ class WithdrawMoneyView(TransactionCreateMixin):
         # balance = 300
         # amount = 5000
         self.request.user.account.save(update_fields=['balance'])
-
+        formatted_amount = "{:,.2f}".format(float(amount))
         messages.success(
             self.request,
-            f'Successfully withdrawn {"{:,.2f}".format(float(amount))}$ from your account'
+            f'Successfully withdrawn {formatted_amount}$ from your account'
         )
         send_transaction_email(self.request.user, amount, "Withdrawal Message", "transactions/withdrawal_email.html")
         return super().form_valid(form)
@@ -117,10 +121,16 @@ class LoanRequestView(TransactionCreateMixin):
             account=self.request.user.account,transaction_type=3,loan_approve=True).count()
         if current_loan_count >= 3:
             return HttpResponse("You have cross the loan limits")
+        formatted_amount = "{:,.2f}".format(float(amount))
+
         messages.success(
             self.request,
-            f'Loan request for {"{:,.2f}".format(float(amount))}$ submitted successfully'
+            f'Loan request for {formatted_amount}$ submitted successfully'
         )
+        # messages.success(
+        #     self.request,
+        #     f'Loan request for {"{:,.2f}".format(float(amount))}$ submitted successfully'
+        # )
         send_transaction_email(self.request.user, amount, "Loan Request Message", "transactions/loan_email.html")
         return super().form_valid(form)
     
@@ -178,7 +188,7 @@ class PayLoanView(LoginRequiredMixin, View):
             else:
                 messages.error(
             self.request,
-            f'Loan amount is greater than available balance'
+            "Loan amount is greater than available balance"
         )
 
         return redirect('loan_list')
@@ -231,7 +241,12 @@ class TransferMoneyView(LoginRequiredMixin,View):
                 balance_after_transaction=recipient_account.balance,
                 transaction_type=1,
             )
-            messages.success(request,f"Successfully transferred transaction {"{:,.2f}".format(float(amount))}$ to account{receipt_account_no}")
+            formatted_amount = "{:,.2f}".format(float(amount))
+            
+            messages.success(request,f"Successfully transferred transaction {formatted_amount}$ to account{receipt_account_no}")
+
+            # messages.success(request,f"Successfully transferred transaction {"{:,.2f}".format(float(amount))}$ to account{receipt_account_no}")
+            
             send_transaction_email(self.request.user, amount, "Transfer Money", "transactions/transfer_money_email.html")
             return redirect(self.success_url)
         
